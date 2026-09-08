@@ -84,11 +84,8 @@ if(PICO_HTTPS_STANDALONE)
         DEVICE_${DEVICE}
     )
 
-    add_subdirectory(lib/pico-lora)
-
     target_link_libraries(${PROJECT}
         pico_stdlib
-        pico_lora
         ${LIBRARY}
     )
 
