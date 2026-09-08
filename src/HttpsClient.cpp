@@ -1,4 +1,4 @@
-#include "HttpsJsonClient.hpp"
+#include "HttpsClient.hpp"
 
 #include <cerrno>
 #include <cstdio>
@@ -20,7 +20,7 @@ constexpr size_t RECEIVE_BUFFER_SIZE = 1024;
 
 }
 
-HttpsJsonClient::HttpsJsonClient(
+HttpsClient::HttpsClient(
     std::string host,
     std::string path,
     const uint8_t* caCertificate,
@@ -42,7 +42,7 @@ HttpsJsonClient::HttpsJsonClient(
     mbedtls_entropy_init(&entropy_);
 }
 
-HttpsJsonClient::~HttpsJsonClient() {
+HttpsClient::~HttpsClient() {
     closeConnection();
 
     mbedtls_ssl_free(&ssl_);
@@ -52,7 +52,7 @@ HttpsJsonClient::~HttpsJsonClient() {
     mbedtls_entropy_free(&entropy_);
 }
 
-bool HttpsJsonClient::initialiseWifi(
+bool HttpsClient::initialiseWifi(
     const std::string& ssid,
     const std::string& password,
     uint32_t timeoutMs
@@ -102,7 +102,7 @@ bool HttpsJsonClient::initialiseWifi(
     return true;
 }
 
-bool HttpsJsonClient::initialiseTls() {
+bool HttpsClient::initialiseTls() {
     if (tlsInitialised_) {
         return true;
     }
@@ -182,7 +182,7 @@ bool HttpsJsonClient::initialiseTls() {
     return true;
 }
 
-bool HttpsJsonClient::connectSocket(uint32_t timeoutMs) {
+bool HttpsClient::connectSocket(uint32_t timeoutMs) {
     struct addrinfo hints {};
     struct addrinfo* addressList = nullptr;
 
@@ -259,7 +259,7 @@ bool HttpsJsonClient::connectSocket(uint32_t timeoutMs) {
     return false;
 }
 
-bool HttpsJsonClient::performTlsHandshake() {
+bool HttpsClient::performTlsHandshake() {
     mbedtls_ssl_free(&ssl_);
     mbedtls_ssl_init(&ssl_);
 
@@ -330,7 +330,7 @@ bool HttpsJsonClient::performTlsHandshake() {
     return true;
 }
 
-bool HttpsJsonClient::sendRequest(const std::string& json) {
+bool HttpsClient::sendRequest(const std::string& json) {
     std::ostringstream request;
 
     request
@@ -376,7 +376,7 @@ bool HttpsJsonClient::sendRequest(const std::string& json) {
     return true;
 }
 
-bool HttpsJsonClient::receiveResponse() {
+bool HttpsClient::receiveResponse() {
     response_.clear();
 
     unsigned char buffer[RECEIVE_BUFFER_SIZE];
@@ -417,7 +417,7 @@ bool HttpsJsonClient::receiveResponse() {
     return true;
 }
 
-bool HttpsJsonClient::post(
+bool HttpsClient::post(
     const std::string& json,
     uint32_t timeoutMs
 ) {
@@ -475,7 +475,7 @@ bool HttpsJsonClient::post(
     return true;
 }
 
-void HttpsJsonClient::parseHttpResponse() {
+void HttpsClient::parseHttpResponse() {
     statusCode_ = 0;
     responseBody_.clear();
 
@@ -510,7 +510,7 @@ void HttpsJsonClient::parseHttpResponse() {
     }
 }
 
-void HttpsJsonClient::closeConnection() {
+void HttpsClient::closeConnection() {
     if (socket_ >= 0) {
         lwip_shutdown(
             socket_,
@@ -523,7 +523,7 @@ void HttpsJsonClient::closeConnection() {
     }
 }
 
-void HttpsJsonClient::setError(
+void HttpsClient::setError(
     const std::string& message,
     int errorCode
 ) {
@@ -548,7 +548,7 @@ void HttpsJsonClient::setError(
         mbedError;
 }
 
-int HttpsJsonClient::tlsSend(
+int HttpsClient::tlsSend(
     void* context,
     const unsigned char* buffer,
     size_t length
@@ -582,7 +582,7 @@ int HttpsJsonClient::tlsSend(
     return MBEDTLS_ERR_SSL_INTERNAL_ERROR;
 }
 
-int HttpsJsonClient::tlsRecv(
+int HttpsClient::tlsRecv(
     void* context,
     unsigned char* buffer,
     size_t length
@@ -618,18 +618,18 @@ int HttpsJsonClient::tlsRecv(
     return MBEDTLS_ERR_SSL_INTERNAL_ERROR;
 }
 
-int HttpsJsonClient::statusCode() const {
+int HttpsClient::statusCode() const {
     return statusCode_;
 }
 
-const std::string& HttpsJsonClient::response() const {
+const std::string& HttpsClient::response() const {
     return response_;
 }
 
-const std::string& HttpsJsonClient::responseBody() const {
+const std::string& HttpsClient::responseBody() const {
     return responseBody_;
 }
 
-const std::string& HttpsJsonClient::errorMessage() const {
+const std::string& HttpsClient::errorMessage() const {
     return errorMessage_;
 }

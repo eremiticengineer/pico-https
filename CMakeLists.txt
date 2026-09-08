@@ -1,57 +1,98 @@
 cmake_minimum_required(VERSION 3.13)
 
-set(PROJECT pico-post-https-test)
+set(LIBRARY pico_https)
 
-set(PICO_BOARD pico2_w CACHE STRING "Board type")
+# ---------------------------------------------------------
+# Are we being built directly or as a submodule?
+# ---------------------------------------------------------
+if(CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
+    set(PICO_HTTPS_STANDALONE TRUE)
+else()
+    set(PICO_HTTPS_STANDALONE FALSE)
+endif()
 
-set(PICO_MBEDTLS_CONFIG_FILE "${CMAKE_CURRENT_LIST_DIR}/include/mbedtls_config.h")
+# ---------------------------------------------------------
+# Standalone project setup
+# ---------------------------------------------------------
+if(PICO_HTTPS_STANDALONE)
 
-include($ENV{PICO_SDK_PATH}/external/pico_sdk_import.cmake)
+    set(PROJECT pico_https_test)
 
-project(${PROJECT} C CXX ASM)
+    set(PICO_BOARD pico2_w CACHE STRING "Board type")
 
-set(CMAKE_C_STANDARD 11)
-set(CMAKE_CXX_STANDARD 23)
+    set(PICO_MBEDTLS_CONFIG_FILE "${CMAKE_CURRENT_LIST_DIR}/include/mbedtls_config.h")
 
-pico_sdk_init()
+    include($ENV{PICO_SDK_PATH}/external/pico_sdk_import.cmake)
 
-message(STATUS "PICO_PLATFORM=${PICO_PLATFORM}")
+    project(${LIBRARY} C CXX ASM)
 
-set(FREERTOS_KERNEL_PATH
-    ${CMAKE_CURRENT_LIST_DIR}/lib/FreeRTOS-Kernel
+    set(CMAKE_C_STANDARD 11)
+    set(CMAKE_CXX_STANDARD 23)
+
+    pico_sdk_init()
+
+    message(STATUS "DEVICE=${DEVICE}")
+    message(STATUS "PICO_BOARD=${PICO_BOARD}")
+    message(STATUS "PICO_PLATFORM=${PICO_PLATFORM}")
+
+endif()
+
+# ---------------------------------------------------------
+# Library
+# ---------------------------------------------------------
+add_library(${LIBRARY}
+    src/HttpsClient.cpp
 )
 
-include(
-    ${FREERTOS_KERNEL_PATH}/portable/ThirdParty/GCC/RP2040/FreeRTOS_Kernel_import.cmake
+target_include_directories(${LIBRARY} PUBLIC
+    ${CMAKE_CURRENT_LIST_DIR}/src
+    ${CMAKE_CURRENT_LIST_DIR}/include
 )
 
-add_executable(${PROJECT}
-  src/pico-post-https-test.cpp
-  src/HttpsJsonClient/HttpsJsonClient.cpp
-  src/WeatherPayload/WeatherPayload.cpp
-)
-
-target_include_directories(${PROJECT} PUBLIC
-  include/
-  src/
-  src/HttpsJsonClient
-  src/WeatherPayload
-)
-
-target_link_libraries(${PROJECT}
+target_link_libraries(${LIBRARY} PUBLIC
     pico_stdlib
-    pico_cyw43_arch_lwip_sys_freertos
+    hardware_spi
     pico_lwip
     pico_mbedtls
+    pico_cyw43_arch_lwip_sys_freertos
     FreeRTOS-Kernel-Heap4
 )
 
-# target_compile_definitions(${PROJECT} PRIVATE
-#     MBEDTLS_NO_PLATFORM_ENTROPY
-#     MBEDTLS_ENTROPY_HARDWARE_ALT
-# )
+# ---------------------------------------------------------
+# Standalone example
+# ---------------------------------------------------------
+if(PICO_HTTPS_STANDALONE)
+    set(FREERTOS_KERNEL_PATH
+        ${CMAKE_CURRENT_LIST_DIR}/lib/FreeRTOS-Kernel
+    )
 
-pico_enable_stdio_usb(${PROJECT} 1)
-pico_enable_stdio_uart(${PROJECT} 1)
+    include(
+        ${FREERTOS_KERNEL_PATH}/portable/ThirdParty/GCC/RP2040/FreeRTOS_Kernel_import.cmake
+    )
 
-pico_add_extra_outputs(${PROJECT})
+    add_executable(${PROJECT}
+        examples/main.cpp
+        examples/WeatherPayload/WeatherPayload.cpp
+    )
+
+    target_include_directories(${PROJECT} PUBLIC
+        include/
+        examples/WeatherPayload
+    )
+
+    target_compile_definitions(${PROJECT} PRIVATE
+        DEVICE_${DEVICE}
+    )
+
+    add_subdirectory(lib/pico-lora)
+
+    target_link_libraries(${PROJECT}
+        pico_stdlib
+        pico_lora
+        ${LIBRARY}
+    )
+
+    pico_enable_stdio_usb(${PROJECT} 1)
+    pico_enable_stdio_uart(${PROJECT} 1)
+    pico_add_extra_outputs(${PROJECT})
+endif()

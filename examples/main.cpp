@@ -4,7 +4,7 @@
 #include "FreeRTOS.h"
 #include "task.h"
 
-#include "HttpsJsonClient.hpp"
+#include "HttpsClient.hpp"
 #include "WeatherPayload.hpp"
 #include "WebServerCertificate.hpp"
 
@@ -13,7 +13,7 @@
 #define HTTPS_TASK_PRIORITY (tskIDLE_PRIORITY + 2)
 
 void https_post_task(__unused void *params) {
-    HttpsJsonClient* pHttpsClient = static_cast<HttpsJsonClient*>(params);
+    HttpsClient* pHttpsClient = static_cast<HttpsClient*>(params);
 
     std::string payload =
         "seq=1 temp=12.4 humidity=76.2 pressure=1008.6 "
@@ -48,12 +48,9 @@ int main( void )
 {
     stdio_init_all();
 
-    for (int c=0; c<5; c++) {
-        printf("waiting\n");
-        sleep_ms(1000);
-    }
+    sleep_ms(2000);
 
-    HttpsJsonClient httpsClient(
+    HttpsClient https_client(
         SERVER,
         SERVER_PATH,
         WEB_SERVER_ROOT_CA,
@@ -61,7 +58,7 @@ int main( void )
         API_KEY
     );
 
-    BaseType_t result = xTaskCreate(https_post_task, "HttpsPostTask", 1024, (void*)&httpsClient, HTTPS_TASK_PRIORITY, nullptr);
+    BaseType_t result = xTaskCreate(https_post_task, "HttpsPostTask", 1024, (void*)&https_client, HTTPS_TASK_PRIORITY, nullptr);
 
     vTaskStartScheduler();
 

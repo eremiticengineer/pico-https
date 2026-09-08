@@ -9,9 +9,9 @@
 #include "mbedtls/ssl.h"
 #include "mbedtls/x509_crt.h"
 
-class HttpsJsonClient {
+class HttpsClient {
 public:
-    HttpsJsonClient(
+    HttpsClient(
         std::string host,
         std::string path,
         const uint8_t* caCertificate,
@@ -20,10 +20,10 @@ public:
         uint16_t port = 443
     );
 
-    ~HttpsJsonClient();
+    ~HttpsClient();
 
-    HttpsJsonClient(const HttpsJsonClient&) = delete;
-    HttpsJsonClient& operator=(const HttpsJsonClient&) = delete;
+    HttpsClient(const HttpsClient&) = delete;
+    HttpsClient& operator=(const HttpsClient&) = delete;
 
     bool initialiseWifi(
         const std::string& ssid,

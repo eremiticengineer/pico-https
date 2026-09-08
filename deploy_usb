@@ -1,5 +1,2 @@
-# pico
-#cp build/pico-post-https-test.uf2 /media/pi/RPI-RP2
-
-# pico2
-cp build/pico-post-https-test.uf2 /media/pi/RP2350
+# pico2w
+cp build/pico_https_test.uf2 /media/pi/RP2350

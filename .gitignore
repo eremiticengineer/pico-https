@@ -26,4 +26,4 @@ compile_commands.json
 *.swo
 *~
 
-src/secrets.hpp
+examples/secrets.hpp
