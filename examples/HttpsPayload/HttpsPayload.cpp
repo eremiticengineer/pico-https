@@ -1,4 +1,4 @@
-#include "WeatherPayload.hpp"
+#include "HttpsPayload.hpp"
 
 #include <cstdlib>
 #include <sstream>
@@ -54,7 +54,7 @@ bool parseUInt64(const std::string& value, uint64_t& result) {
 
 }
 
-bool WeatherPayload::parse(const std::string& payload, WeatherPayload& weather) {
+bool HttpsPayload::parse(const std::string& payload, HttpsPayload& weather) {
     std::istringstream stream(payload);
     std::string token;
 
@@ -118,7 +118,7 @@ bool WeatherPayload::parse(const std::string& payload, WeatherPayload& weather) 
            haveTimestamp;
 }
 
-std::string WeatherPayload::toJson() const {
+std::string HttpsPayload::toJson() const {
     std::ostringstream json;
 
     json << "{"

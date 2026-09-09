@@ -5,7 +5,7 @@
 #include "task.h"
 
 #include "HttpsClient.hpp"
-#include "WeatherPayload.hpp"
+#include "HttpsPayload.hpp"
 #include "WebServerCertificate.hpp"
 
 #include "secrets.hpp"
@@ -15,16 +15,16 @@
 void https_post_task(__unused void *params) {
     HttpsClient* pHttpsClient = static_cast<HttpsClient*>(params);
 
-    std::string payload =
+    std::string weather_payload =
         "seq=1 temp=12.4 humidity=76.2 pressure=1008.6 "
         "wind=8.7 gust=14.2 direction=23 rain=1.4 "
         "lux=12500.0 battery=4.87 timestamp=1788004800";
 
-    WeatherPayload weather;
-    if (!WeatherPayload::parse(payload, weather)) {
-        printf("Invalid weather packet: %s\n", payload.c_str());
+    HttpsPayload https_payload;
+    if (!HttpsPayload::parse(weather_payload, https_payload)) {
+        printf("Invalid weather packet: %s\n", weather_payload.c_str());
     }
-    const std::string json = weather.toJson();
+    const std::string json = https_payload.toJson();
     printf("JSON: %s\n", json.c_str());
 
     if (!pHttpsClient->initialiseWifi(WIFI_SSID, WIFI_PASSWORD)) {

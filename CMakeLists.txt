@@ -72,12 +72,12 @@ if(PICO_HTTPS_STANDALONE)
 
     add_executable(${PROJECT}
         examples/main.cpp
-        examples/WeatherPayload/WeatherPayload.cpp
+        examples/HttpsPayload/HttpsPayload.cpp
     )
 
     target_include_directories(${PROJECT} PUBLIC
         include/
-        examples/WeatherPayload
+        examples/HttpsPayload
     )
 
     target_compile_definitions(${PROJECT} PRIVATE

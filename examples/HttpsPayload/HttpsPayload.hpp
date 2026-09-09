@@ -3,7 +3,7 @@
 #include <cstdint>
 #include <string>
 
-class WeatherPayload {
+class HttpsPayload {
 public:
     uint32_t sequence = 0;
     float temperature = 0.0f;
@@ -17,7 +17,7 @@ public:
     float battery = 0.0f;
     uint64_t timestamp = 0;
 
-    static bool parse(const std::string& payload, WeatherPayload& weather);
+    static bool parse(const std::string& payload, HttpsPayload& weather);
 
     std::string toJson() const;
 };
