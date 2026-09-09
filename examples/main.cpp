@@ -58,6 +58,9 @@ int main( void )
         API_KEY
     );
 
+    // If you use an external wifi management library such as pico_wifi, tell pico_https not to use its own wifi management
+    //https_client.setWifiManagedExternally(true);
+
     BaseType_t result = xTaskCreate(https_post_task, "HttpsPostTask", 1024, (void*)&https_client, HTTPS_TASK_PRIORITY, nullptr);
 
     vTaskStartScheduler();

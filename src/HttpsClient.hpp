@@ -25,6 +25,10 @@ public:
     HttpsClient(const HttpsClient&) = delete;
     HttpsClient& operator=(const HttpsClient&) = delete;
 
+    void setWifiManagedExternally(bool enabled) {
+        wifiManagedExternally_ = enabled;
+    }
+
     bool initialiseWifi(
         const std::string& ssid,
         const std::string& password,
@@ -89,6 +93,7 @@ private:
     int socket_ = -1;
 
     bool wifiInitialised_ = false;
+    bool wifiManagedExternally_ = false;
     bool tlsInitialised_ = false;
 
     int statusCode_ = 0;

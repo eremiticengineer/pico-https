@@ -427,7 +427,7 @@ bool HttpsClient::post(
     responseBody_.clear();
     errorMessage_.clear();
 
-    if (!wifiInitialised_) {
+    if (!wifiInitialised_ && !wifiManagedExternally_) {
         errorMessage_ = "WiFi has not been initialised";
         return false;
     }
