@@ -16,11 +16,9 @@ endif()
 # ---------------------------------------------------------
 if(PICO_HTTPS_STANDALONE)
 
-    set(PROJECT pico_https_test)
+    set(PROJECT pico_https_example)
 
     set(PICO_BOARD pico2_w CACHE STRING "Board type")
-
-    set(PICO_MBEDTLS_CONFIG_FILE "${CMAKE_CURRENT_LIST_DIR}/include/mbedtls_config.h")
 
     include($ENV{PICO_SDK_PATH}/external/pico_sdk_import.cmake)
 
@@ -30,6 +28,17 @@ if(PICO_HTTPS_STANDALONE)
     set(CMAKE_CXX_STANDARD 23)
 
     pico_sdk_init()
+
+    # -----------------------------------------------------
+    # FreeRTOS
+    # -----------------------------------------------------
+    set(FREERTOS_KERNEL_PATH
+        ${CMAKE_CURRENT_LIST_DIR}/lib/FreeRTOS-Kernel
+    )
+
+    include(
+        ${FREERTOS_KERNEL_PATH}/portable/ThirdParty/GCC/RP2040/FreeRTOS_Kernel_import.cmake
+    )
 
     message(STATUS "DEVICE=${DEVICE}")
     message(STATUS "PICO_BOARD=${PICO_BOARD}")
@@ -46,13 +55,18 @@ add_library(${LIBRARY}
 
 target_include_directories(${LIBRARY} PUBLIC
     ${CMAKE_CURRENT_LIST_DIR}/src
-    ${CMAKE_CURRENT_LIST_DIR}/include
 )
+
+# When building the standalone example, its configuration
+# files are the application-wide FreeRTOS/lwIP configuration.
+if(PICO_HTTPS_STANDALONE)
+    target_include_directories(${LIBRARY} PRIVATE
+        ${CMAKE_CURRENT_LIST_DIR}/examples/include
+    )
+endif()
 
 target_link_libraries(${LIBRARY} PUBLIC
     pico_stdlib
-    hardware_spi
-    pico_lwip
     pico_mbedtls
     pico_cyw43_arch_lwip_sys_freertos
     FreeRTOS-Kernel-Heap4
@@ -62,34 +76,28 @@ target_link_libraries(${LIBRARY} PUBLIC
 # Standalone example
 # ---------------------------------------------------------
 if(PICO_HTTPS_STANDALONE)
-    set(FREERTOS_KERNEL_PATH
-        ${CMAKE_CURRENT_LIST_DIR}/lib/FreeRTOS-Kernel
-    )
-
-    include(
-        ${FREERTOS_KERNEL_PATH}/portable/ThirdParty/GCC/RP2040/FreeRTOS_Kernel_import.cmake
-    )
 
     add_executable(${PROJECT}
         examples/main.cpp
         examples/HttpsPayload/HttpsPayload.cpp
     )
 
-    target_include_directories(${PROJECT} PUBLIC
-        include/
-        examples/HttpsPayload
+    target_include_directories(${PROJECT} PRIVATE
+        ${CMAKE_CURRENT_LIST_DIR}/examples/include
+        ${CMAKE_CURRENT_LIST_DIR}/examples/HttpsPayload
     )
 
     target_compile_definitions(${PROJECT} PRIVATE
         DEVICE_${DEVICE}
     )
 
-    target_link_libraries(${PROJECT}
-        pico_stdlib
+    target_link_libraries(${PROJECT} PRIVATE
         ${LIBRARY}
     )
 
     pico_enable_stdio_usb(${PROJECT} 1)
     pico_enable_stdio_uart(${PROJECT} 1)
+
     pico_add_extra_outputs(${PROJECT})
+
 endif()

@@ -1,2 +1,2 @@
 # pico2w
-cp build/pico_https_test.uf2 /media/pi/RP2350
+cp build/pico_https_example.uf2 /media/pi/RP2350
