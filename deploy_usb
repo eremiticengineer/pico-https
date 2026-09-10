@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # pico_w
-# cp build/pico_https_example.uf2 /media/pi/RP2040
+# cp build-pico_w/pico_https_example.uf2 /media/pi/RP2040
 
 # pico2_w
-cp build/pico_https_example.uf2 /media/pi/RP2350
+cp build-pico2_w/pico_https_example.uf2 /media/pi/RP2350
