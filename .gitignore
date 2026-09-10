@@ -1,5 +1,7 @@
 # Build output
 build/
+build-pico_w/
+build-pico2_w/
 cmake-build-*/
 
 # CMake generated files
